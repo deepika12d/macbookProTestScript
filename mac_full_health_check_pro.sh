@@ -53,6 +53,17 @@ echo ""
 echo "=== 🔄 Running Processes ==="
 ps aux | sort -rk 3,3 | head -n 10
 
+# GPU Information
+echo ""
+echo "=== 🎮 Graphics (GPU) Information ==="
+# GPU Model and VRAM
+system_profiler SPDisplaysDataType | grep -E 'Chipset Model|VRAM (Dynamic,Max)'
+
+# If you want to get the GPU temperature (for some GPUs)
+echo "Fetching GPU temperature (if available)..."
+sudo powermetrics --samplers smc | grep -E 'GPU die temperature'
+
+
 # CPU Temperature, Fan Speed, and More
 echo ""
 echo "=== 🌡️ CPU Temperature, Fan Speed and Power ==="
@@ -62,6 +73,7 @@ sudo powermetrics --samplers smc | egrep "CPU die temperature|Fan:|CPU Power|GPU
 echo ""
 echo "=== 🚀 CPU Throttling Info ==="
 pmset -g thermlog | grep CPU_Speed_Limit
+
 
 # End of Full Health Check
 echo ""
