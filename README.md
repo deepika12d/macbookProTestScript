@@ -7,3 +7,9 @@ chrome
 
 sudo chmod +x open_random_websites-chrome.sh
 sudo ./open_random_websites-chrome.sh
+
+
+safari
+
+sudo chmod +x open_random_websites-safari.sh
+sudo ./open_random_websites-safari.sh
