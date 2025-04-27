@@ -1,44 +1,52 @@
 #!/bin/bash
 
-echo "=========================================="
-echo "         🍏 MAC FULL HEALTH CHECK PRO      "
-echo "=========================================="
+# Full Mac Health Check Script
 
-# Battery Health Percentage
+# Check if the user has sudo privileges
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Please run the script with sudo privileges."
+  exit 1
+fi
+
+# SSD Health Information
 echo ""
-echo "=== 🔋 Battery Wear Percentage ==="
-system_profiler SPPowerDataType | awk '/Full Charge 
-Capacity/{fcc=$NF}/Design Capacity/{dc=$NF}END{if (fcc && dc) 
-printf("Battery Health: %.2f%%\n", (fcc/dc)*100)}'
+echo "=== 💾 SSD Health Information ==="
+diskutil list
 
-# Battery Cycle Count and Condition
+# Run smartctl to get more detailed health metrics
+echo "Fetching SSD Health Data..."
+sudo smartctl -a /dev/disk0 | grep -E 'Temperature_Celsius|Reallocated_Sector_Ct|Wear_Leveling_Count|Power_On_Hours'
+
+# Memory Information
 echo ""
-echo "=== 🔋 Battery Cycle Count and Condition ==="
-system_profiler SPPowerDataType | grep -i "cycle count\|condition"
+echo "=== 💻 Memory Information ==="
+vm_stat | grep -E 'Pages free|Pages active|Pages inactive'
 
-# SSD Info
+# Battery Health (for laptops)
 echo ""
-echo "=== 💾 SSD Information ==="
-diskutil list internal
+echo "=== 🔋 Battery Health ==="
+system_profiler SPPowerDataType | grep -E 'Cycle Count|Condition|Full Charge'
 
-# CPU Temperature, Fan Speed, and More
+# Disk Usage
+echo ""
+echo "=== 📂 Disk Usage ==="
+df -h / | grep "/"
+
+# System Information
+echo ""
+echo "=== 🖥️ System Information ==="
+system_profiler SPHardwareDataType | grep -E 'Model Identifier|Processor Name|Processor Speed|Total Number of Cores|Memory'
+
+# Running Processes
+echo ""
+echo "=== 🔄 Running Processes ==="
+ps aux | sort -rk 3,3 | head -n 10
+
+# CPU Temperature, Fan Speed, and Power
 echo ""
 echo "=== 🌡️ CPU Temperature, Fan Speed and Power ==="
-sudo powermetrics --samplers smc | egrep "CPU die temperature|Fan:|CPU 
-Power|GPU die temperature"
+sudo powermetrics --samplers smc | grep -E 'CPU die temperature|Fan|CPU Power' | awk '{print $1, $2, $3}'
 
-# CPU Throttling
+# End of Full Health Check
 echo ""
-echo "=== 🚀 CPU Throttling Info ==="
-pmset -g thermlog | grep CPU_Speed_Limit
-
-# RAM Information
-echo ""
-echo "=== 🧠 RAM Information ==="
-system_profiler SPMemoryDataType | grep -E "Size:|Type:|Speed:"
-
-echo ""
-echo "=========================================="
-echo "            ✅ PRO CHECK COMPLETE          "
-echo "=========================================="
-
+echo "=== ✅ Full System Health Check Complete ==="
